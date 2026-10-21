@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Orbitron', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, monospace;
+}
+
+html,
+body {
+  background: #03040c;
+  overscroll-behavior: none;
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.8), 0 0 24px rgba(34, 211, 238, 0.4);
+}
+
+.text-glow-fuchsia {
+  text-shadow: 0 0 8px rgba(232, 121, 249, 0.8), 0 0 24px rgba(232, 121, 249, 0.4);
+}
+
+/* ---------- Background scene ---------- */
+
+.stars {
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, #fff8, transparent),
+    radial-gradient(1px 1px at 30% 8%, #fff6, transparent),
+    radial-gradient(1.5px 1.5px at 55% 25%, #fffa, transparent),
+    radial-gradient(1px 1px at 70% 12%, #fff7, transparent),
+    radial-gradient(1px 1px at 85% 30%, #fff5, transparent),
+    radial-gradient(1.5px 1.5px at 92% 6%, #fff9, transparent),
+    radial-gradient(1px 1px at 18% 33%, #fff4, transparent),
+    radial-gradient(1px 1px at 42% 15%, #fff6, transparent),
+    radial-gradient(ellipse at 50% 0%, rgba(88, 28, 135, 0.45), transparent 60%);
+  animation: twinkle 6s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  to {
+    opacity: 0.6;
+  }
+}
+
+.sun {
+  background: linear-gradient(180deg, #fde047 0%, #f472b6 45%, #a21caf 75%, transparent 100%);
+  mask-image: repeating-linear-gradient(180deg, #000 0 14px, transparent 14px 18px);
+  filter: drop-shadow(0 0 60px rgba(244, 114, 182, 0.6));
+  opacity: 0.5;
+  clip-path: inset(0 0 50% 0);
+}
+
+.floor-wrap {
+  perspective: 300px;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent, #000 30%);
+}
+
+.floor {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  top: 0;
+  height: 200%;
+  transform-origin: top center;
+  transform: rotateX(70deg);
+  background-image:
+    linear-gradient(rgba(217, 70, 239, 0.55) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.45) 2px, transparent 2px);
+  background-size: 60px 60px;
+  animation: floor-move 1.6s linear infinite;
+}
+
+@keyframes floor-move {
+  to {
+    background-position: 0 60px;
+  }
+}
+
+.scanlines {
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+
+/* ---------- Board ---------- */
+
+.board-3d {
+  transform: rotateX(10deg);
+  will-change: transform;
+}
+
+.board-frame {
+  border: 1px solid rgba(103, 232, 249, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(232, 121, 249, 0.2),
+    0 0 30px rgba(34, 211, 238, 0.35),
+    0 0 90px rgba(192, 38, 211, 0.25),
+    inset 0 0 40px rgba(34, 211, 238, 0.12);
+}
+
+.hud-panel {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(192, 38, 211, 0.06));
+  border: 1px solid rgba(103, 232, 249, 0.18);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  backdrop-filter: blur(6px);
+}
+
+.neon-btn {
+  position: relative;
+  color: #ecfeff;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.2), rgba(217, 70, 239, 0.2));
+  border: 1px solid #67e8f9;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.35);
+  text-shadow: 0 0 10px #22d3ee;
+  transition:
+    transform 0.15s,
+    background 0.2s,
+    box-shadow 0.2s;
+}
+
+.neon-btn:hover {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.45), rgba(217, 70, 239, 0.45));
+  box-shadow: inset 0 0 30px rgba(34, 211, 238, 0.6);
+  transform: scale(1.04);
+}
+
+.neon-btn:active {
+  transform: scale(0.97);
+}
+
+.dpad-btn {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(192, 38, 211, 0.12));
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  box-shadow:
+    0 0 14px rgba(34, 211, 238, 0.25),
+    inset 0 0 12px rgba(34, 211, 238, 0.15);
+  touch-action: none;
+}
+
+.dpad-btn:active {
+  background: rgba(34, 211, 238, 0.35);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.7);
+}
+
+.overlay-in {
+  animation: overlay-in 0.35s ease-out both;
+}
+
+.overlay-in-delayed {
+  animation: overlay-in 0.5s ease-out 0.5s both;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+/* ---------- Glitch title ---------- */
+
+.glitch {
+  position: relative;
+  background: linear-gradient(90deg, #67e8f9, #e879f9, #fde047);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.45));
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glitch::before {
+  animation: glitch-a 3.2s infinite steps(1);
+  text-shadow: -2px 0 #f0f;
+}
+
+.glitch::after {
+  animation: glitch-b 2.7s infinite steps(1);
+  text-shadow: 2px 0 #0ff;
+}
+
+@keyframes glitch-a {
+  0%, 92%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  93% { clip-path: inset(10% 0 60% 0); transform: translate(-3px, 0); }
+  95% { clip-path: inset(50% 0 20% 0); transform: translate(3px, 0); }
+  97% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, 0); }
+}
+
+@keyframes glitch-b {
+  0%, 88%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  89% { clip-path: inset(70% 0 10% 0); transform: translate(3px, 0); }
+  92% { clip-path: inset(20% 0 55% 0); transform: translate(-3px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floor,
+  .stars,
+  .glitch::before,
+  .glitch::after {
+    animation: none;
+  }
+}
