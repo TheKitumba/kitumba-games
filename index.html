@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Neon Snake — Jogo da Cobrinha Futurista Online e Grátis</title>
+    <title>Kitumba Games — Jogos Neon no Browser</title>
     <meta
       name="description"
-      content="Joga o clássico jogo da cobrinha num estilo neon futurista. Grátis no browser, sem instalar: combos, bónus, níveis, música synthwave e controlos para telemóvel."
+      content="Kitumba Games: uma coleção de jogos arcade com visual neon, grátis no browser e sem instalar. Começa pelo Kitumba Snake, o clássico jogo da cobrinha com combos, bónus e música synthwave."
     />
-    <meta name="keywords" content="jogo da cobrinha, snake, snake online, jogo da cobra, jogo grátis, jogo no browser, neon, synthwave, arcade" />
+    <meta name="keywords" content="kitumba games, jogos online, jogos grátis, jogo da cobrinha, snake, snake online, jogo da cobra, jogo grátis, jogo no browser, neon, synthwave, arcade" />
     <meta name="author" content="thekitumba" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#03040c" />
@@ -22,53 +22,61 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Neon Snake" />
+    <meta name="apple-mobile-web-app-title" content="Kitumba Games" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Neon Snake" />
+    <meta property="og:site_name" content="Kitumba Games" />
     <meta property="og:locale" content="pt_PT" />
     <meta property="og:locale:alternate" content="pt_BR" />
     <meta property="og:url" content="%VITE_SITE_URL%/" />
-    <meta property="og:title" content="Neon Snake — Jogo da Cobrinha Futurista" />
+    <meta property="og:title" content="Kitumba Games — Jogos Neon no Browser" />
     <meta
       property="og:description"
-      content="O clássico jogo da cobrinha com visual neon, combos, bónus e música synthwave. Joga grátis no browser."
+      content="Jogos arcade com visual neon, grátis no browser. Começa pelo Kitumba Snake: combos, bónus e música synthwave."
     />
     <meta property="og:image" content="%VITE_SITE_URL%/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Logótipo Neon Snake ao lado de um tabuleiro neon com a cobra e a comida" />
+    <meta property="og:image:alt" content="Logótipo Kitumba Snake ao lado de um tabuleiro neon com a cobra e a comida" />
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Neon Snake — Jogo da Cobrinha Futurista" />
+    <meta name="twitter:title" content="Kitumba Games — Jogos Neon no Browser" />
     <meta
       name="twitter:description"
-      content="O clássico jogo da cobrinha com visual neon, combos, bónus e música synthwave. Joga grátis no browser."
+      content="Jogos arcade com visual neon, grátis no browser. Começa pelo Kitumba Snake: combos, bónus e música synthwave."
     />
     <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.png" />
-    <meta name="twitter:image:alt" content="Logótipo Neon Snake ao lado de um tabuleiro neon com a cobra e a comida" />
+    <meta name="twitter:image:alt" content="Logótipo Kitumba Snake ao lado de um tabuleiro neon com a cobra e a comida" />
 
     <!-- Structured data -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "VideoGame",
-        "name": "Neon Snake",
-        "alternateName": "Jogo da Cobrinha",
+        "@type": "WebSite",
+        "name": "Kitumba Games",
         "url": "%VITE_SITE_URL%/",
-        "image": "%VITE_SITE_URL%/og-image.png",
-        "description": "O clássico jogo da cobrinha com visual neon futurista, combos, bónus, níveis e música synthwave, jogável no browser.",
         "inLanguage": "pt",
-        "genre": ["Arcade", "Casual"],
-        "gamePlatform": ["Web browser", "Mobile", "Desktop"],
-        "applicationCategory": "Game",
-        "operatingSystem": "Any",
-        "playMode": "SinglePlayer",
-        "isAccessibleForFree": true,
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+        "hasPart": [
+          {
+            "@type": "VideoGame",
+            "name": "Kitumba Snake",
+            "alternateName": "Jogo da Cobrinha",
+            "url": "%VITE_SITE_URL%/snake",
+            "image": "%VITE_SITE_URL%/og-image.png",
+            "description": "O clássico jogo da cobrinha com visual neon futurista, combos, bónus, níveis e música synthwave, jogável no browser.",
+            "inLanguage": "pt",
+            "genre": ["Arcade", "Casual"],
+            "gamePlatform": ["Web browser", "Mobile", "Desktop"],
+            "applicationCategory": "Game",
+            "operatingSystem": "Any",
+            "playMode": "SinglePlayer",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+          }
+        ]
       }
     </script>
 
@@ -82,9 +90,10 @@
   <body>
     <div id="root"></div>
     <noscript>
-      <h1>Neon Snake — Jogo da Cobrinha</h1>
+      <h1>Kitumba Games</h1>
       <p>
-        O clássico jogo da cobrinha com visual neon futurista. Ativa o JavaScript no teu browser para jogar.
+        Uma coleção de jogos arcade com visual neon, como o Kitumba Snake (jogo da cobrinha). Ativa o JavaScript no
+        teu browser para jogar.
       </p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

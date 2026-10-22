@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="public/og-image.png" alt="Neon Snake" width="720" />
+<img src="../../../public/og-image.png" alt="Kitumba Snake" width="720" />
 
-# Neon Snake
+# Kitumba Snake
+
+<sub>[← Kitumba Games](../../../README.md) · rota <code>/snake</code></sub>
 
 **O clássico jogo da cobrinha, reimaginado com visual neon futurista.**
 Corre no browser, sem instalação, com efeitos sonoros sintetizados em tempo real, música synthwave, combos, bónus e controlos para telemóvel.
@@ -36,9 +38,8 @@ Corre no browser, sem instalação, com efeitos sonoros sintetizados em tempo re
 4. [Estados do jogo](#estados-do-jogo)
 5. [Feedback visual e sonoro](#feedback-visual-e-sonoro)
 6. [Arquitetura técnica](#arquitetura-técnica)
-7. [SEO e partilha](#seo-e-partilha)
-8. [Desenvolvimento](#desenvolvimento)
-9. [Comportamentos conhecidos](#comportamentos-conhecidos)
+7. [Ajustar a jogabilidade](#ajustar-a-jogabilidade)
+8. [Comportamentos conhecidos](#comportamentos-conhecidos)
 
 ---
 
@@ -46,28 +47,28 @@ Corre no browser, sem instalação, com efeitos sonoros sintetizados em tempo re
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/menu.png" alt="Menu inicial" /></td>
-    <td width="50%"><img src="docs/screenshots/gameplay.png" alt="Jogo em curso com combo x5 e bónus dourado" /></td>
+    <td width="50%"><img src="screenshots/menu.png" alt="Menu inicial" /></td>
+    <td width="50%"><img src="screenshots/gameplay.png" alt="Jogo em curso com combo x5 e bónus dourado" /></td>
   </tr>
   <tr>
     <td align="center"><b>Menu inicial</b><br/><sub>Escolha do modo (Paredes / Portal) e lista de controlos</sub></td>
     <td align="center"><b>Em jogo</b><br/><sub>Nível 3, combo x5 (+150 pontos por comida) e bónus dourado no tabuleiro</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/pause.png" alt="Ecrã de pausa" /></td>
-    <td><img src="docs/screenshots/gameover.png" alt="Ecrã de game over com novo recorde" /></td>
+    <td><img src="screenshots/pause.png" alt="Ecrã de pausa" /></td>
+    <td><img src="screenshots/gameover.png" alt="Ecrã de game over com novo recorde" /></td>
   </tr>
   <tr>
     <td align="center"><b>Pausa</b><br/><sub>O tabuleiro fica desfocado por trás do painel</sub></td>
     <td align="center"><b>Game over</b><br/><sub>Pontuação final, recorde, nível e tamanho alcançados</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/portal.png" alt="Modo Portal" /></td>
+    <td><img src="screenshots/portal.png" alt="Modo Portal" /></td>
     <td>
       <table>
         <tr>
-          <td><img src="docs/screenshots/mobile-menu.png" alt="Menu em telemóvel" /></td>
-          <td><img src="docs/screenshots/mobile-gameplay.png" alt="Jogo em telemóvel com D-pad" /></td>
+          <td><img src="screenshots/mobile-menu.png" alt="Menu em telemóvel" /></td>
+          <td><img src="screenshots/mobile-gameplay.png" alt="Jogo em telemóvel com D-pad" /></td>
         </tr>
       </table>
     </td>
@@ -99,7 +100,7 @@ Guia a cobra até à **comida** (orbe magenta). Cada vez que come, a cobra cresc
 
 ## Regras do jogo
 
-As regras estão todas em [src/game/engine.ts](src/game/engine.ts). Os valores abaixo vêm das constantes desse ficheiro.
+As regras estão todas em [src/games/snake/engine.ts](../../../src/games/snake/engine.ts). Os valores abaixo vêm das constantes desse ficheiro.
 
 ### Tabuleiro e estado inicial
 
@@ -257,7 +258,7 @@ stateDiagram-v2
 
 ## Feedback visual e sonoro
 
-Todos os sons são **sintetizados em tempo real** com a Web Audio API ([src/game/audio.ts](src/game/audio.ts)). Não há ficheiros de áudio.
+Todos os sons são **sintetizados em tempo real** com a Web Audio API ([src/games/snake/audio.ts](../../../src/games/snake/audio.ts)). Não há ficheiros de áudio.
 
 | Evento | Som | Efeito visual |
 |---|---|---|
@@ -298,26 +299,16 @@ Todos os sons são **sintetizados em tempo real** com a Web Audio API ([src/game
 
 ### Estrutura
 
+O jogo vive todo numa pasta e é registado no catálogo da plataforma em [src/games/index.ts](../../../src/games/index.ts) com o slug `snake`. A cena de fundo (grelha synthwave, sol, estrelas, scanlines) e os estilos neon partilhados vêm da plataforma (`src/components/Layout.tsx` e `src/index.css`).
+
 ```
-snake/
-├── index.html               # Meta tags SEO, Open Graph, Twitter, JSON-LD
-├── vite.config.ts           # Plugins: React, Tailwind, gerador de robots.txt/sitemap.xml
-├── .env                     # VITE_SITE_URL (URL público do jogo)
-├── public/
-│   ├── favicon.svg          # Ícone do jogo
-│   ├── og-image.png         # Imagem de partilha 1200×630
-│   ├── apple-touch-icon.png
-│   ├── icon-192.png / icon-512.png
-│   └── manifest.webmanifest # Instalação como app (PWA)
-├── docs/screenshots/        # Capturas usadas neste README
-└── src/
-    ├── main.tsx             # Ponto de entrada
-    ├── App.tsx              # HUD, painéis (menu/pausa/game over), input, tilt 3D, D-pad
-    ├── index.css            # Tema: cena synthwave, botões neon, glitch, animações
-    └── game/
-        ├── engine.ts        # Regras, game loop e renderização no canvas
-        └── audio.ts         # Sintetizador de efeitos e música
+src/games/snake/
+├── SnakePage.tsx    # Página da rota /snake: HUD, painéis (menu/pausa/game over), input, tilt 3D, D-pad
+├── engine.ts        # Regras, game loop e renderização no canvas
+└── audio.ts         # Sintetizador de efeitos e música
 ```
+
+A página é carregada com `React.lazy`, por isso o código do jogo só é descarregado quando alguém abre `/snake`.
 
 ### Separação de responsabilidades
 
@@ -329,9 +320,9 @@ snake/
   | `togglePause()` | Alterna entre `playing` ↔ `paused` |
   | `setDirection(x, y)` | Põe uma direção na fila (com as regras de [movimento](#movimento-e-direção)) |
   | `setWrap(bool)` | Troca o modo Paredes/Portal (só fora de jogo) |
-  | `destroy()` | Pára o loop e o `ResizeObserver` |
+  | `destroy()` | Pára o loop, o `ResizeObserver` e a música (chamado ao sair da rota) |
 
-- **`App.tsx`** trata do input (teclado, swipe, D-pad, perda de foco), mostra o `HudState` recebido e desenha os painéis. O React **só volta a renderizar quando o HUD muda** (pontos, nível, combo, estado), nunca a cada frame.
+- **`SnakePage.tsx`** trata do input (teclado, swipe, D-pad, perda de foco), mostra o `HudState` recebido e desenha os painéis. O React **só volta a renderizar quando o HUD muda** (pontos, nível, combo, estado), nunca a cada frame.
 
 ### Game loop
 
@@ -341,45 +332,9 @@ snake/
 
 ---
 
-## SEO e partilha
+## Ajustar a jogabilidade
 
-- `<title>`, `description`, `keywords`, `canonical` e `robots`;
-- **Open Graph** (Facebook, WhatsApp, LinkedIn, Discord) com imagem 1200×630;
-- **Twitter/X Card** `summary_large_image`;
-- **JSON-LD** `schema.org/VideoGame` para resultados enriquecidos;
-- **Web App Manifest** e ícones, para instalar no ecrã principal;
-- `robots.txt` e `sitemap.xml` gerados automaticamente no build;
-- `<noscript>` com o nome e a descrição para crawlers sem JavaScript.
-
-> ⚠️ **Antes de publicar**, define o domínio real em [`.env`](.env):
->
-> ```
-> VITE_SITE_URL=https://o-teu-dominio.com
-> ```
->
-> Todos os URLs absolutos (canonical, `og:url`, `og:image`, JSON-LD, sitemap) vêm desta variável. Se ela estiver vazia, o build falha de propósito.
-
-Depois do deploy, valida a pré-visualização no [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) ou no [opengraph.xyz](https://www.opengraph.xyz/).
-
----
-
-## Desenvolvimento
-
-Requisitos: **Node.js 20+** e **pnpm**.
-
-```bash
-pnpm install     # instalar dependências
-pnpm dev         # servidor de desenvolvimento (http://localhost:5173)
-pnpm build       # type-check + build de produção em dist/
-pnpm preview     # servir o build localmente
-pnpm lint        # ESLint
-```
-
-O resultado de `pnpm build` é um site **100% estático** (pasta `dist/`), que se pode publicar em qualquer alojamento estático: Vercel, Netlify, GitHub Pages, Cloudflare Pages, etc.
-
-### Ajustar a jogabilidade
-
-As regras principais são constantes no topo de [src/game/engine.ts](src/game/engine.ts):
+As regras principais são constantes no topo de [src/games/snake/engine.ts](../../../src/games/snake/engine.ts):
 
 | Constante | Valor | Efeito |
 |---|---|---|

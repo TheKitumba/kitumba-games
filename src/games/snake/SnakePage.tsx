@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { audio } from './game/audio'
-import { SnakeGame, type HudState } from './game/engine'
+import { Link } from 'react-router'
+import { audio } from './audio'
+import { SnakeGame, type HudState } from './engine'
 
 const KEY_DIRS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -69,7 +70,7 @@ function NeonButton({
   )
 }
 
-export default function App() {
+export default function SnakePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<SnakeGame | null>(null)
@@ -183,185 +184,177 @@ export default function App() {
   const multiplier = Math.min(1 + hud.combo, 5)
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-[#03040c] text-white select-none">
-      {/* ---------- Background scene ---------- */}
-      <div className="stars pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-[38%] h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent blur-[1px]" />
-      <div className="sun pointer-events-none absolute top-[38%] left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full" />
-      <div className="floor-wrap pointer-events-none absolute inset-x-0 top-[38%] bottom-0">
-        <div className="floor" />
-      </div>
-      <div className="scanlines pointer-events-none absolute inset-0 z-50" />
-
-      {/* ---------- Content ---------- */}
-      <main className="relative z-10 mx-auto flex min-h-dvh max-w-5xl flex-col items-center px-4 pt-5 pb-6 sm:pt-8">
-        <header className="mb-4 flex w-full items-center justify-between gap-4 sm:mb-6">
-          <div>
-            <h1
-              className="glitch font-display text-2xl font-black tracking-[0.18em] sm:text-4xl"
-              data-text="NEON SNAKE"
-            >
-              NEON SNAKE
-            </h1>
-            <p className="font-mono text-[10px] tracking-[0.4em] text-cyan-200/40 uppercase">
-              Protocolo // 2099
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <NeonButton variant="ghost" onClick={toggleMute}>
-              {muted ? '🔇 Som' : '🔊 Som'}
+    <main className="mx-auto flex min-h-dvh max-w-5xl flex-col items-center px-4 pt-5 pb-6 sm:pt-8">
+      <title>Kitumba Snake — Kitumba Games</title>
+      <header className="mb-4 flex w-full items-center justify-between gap-4 sm:mb-6">
+        <div>
+          <Link
+            to="/"
+            className="font-mono text-[10px] tracking-[0.4em] text-cyan-200/50 uppercase transition hover:text-white"
+          >
+            ← Kitumba Games
+          </Link>
+          <h1
+            className="glitch font-display text-2xl font-black tracking-[0.18em] sm:text-4xl"
+            data-text="KITUMBA SNAKE"
+          >
+            KITUMBA SNAKE
+          </h1>
+        </div>
+        <div className="flex gap-2">
+          <NeonButton variant="ghost" onClick={toggleMute}>
+            {muted ? '🔇 Som' : '🔊 Som'}
+          </NeonButton>
+          {(hud.mode === 'playing' || hud.mode === 'paused') && (
+            <NeonButton variant="ghost" onClick={pause}>
+              {hud.mode === 'paused' ? '▶' : '❚❚'}
             </NeonButton>
-            {(hud.mode === 'playing' || hud.mode === 'paused') && (
-              <NeonButton variant="ghost" onClick={pause}>
-                {hud.mode === 'paused' ? '▶' : '❚❚'}
-              </NeonButton>
-            )}
-          </div>
-        </header>
-
-        <section className="mb-4 grid w-full max-w-[600px] grid-cols-4 gap-2 sm:mb-6 sm:gap-3">
-          <Stat label="Pontos" value={hud.score.toLocaleString('pt-PT')} accent="text-cyan-300 text-glow-cyan" />
-          <Stat label="Recorde" value={hud.best.toLocaleString('pt-PT')} accent="text-fuchsia-300 text-glow-fuchsia" />
-          <Stat label="Nível" value={hud.level} accent="text-amber-300" />
-          <Stat
-            label="Combo"
-            value={`x${multiplier}`}
-            accent={multiplier > 1 ? 'text-lime-300 animate-pulse' : 'text-white/40'}
-          />
-        </section>
-
-        {/* ---------- 3D Board ---------- */}
-        <div className="w-[min(100%,600px,calc(100dvh-400px))] min-w-65 perspective-[1400px] md:w-[min(100%,600px,calc(100dvh-230px))]">
-          <div ref={boardRef} className="board-3d relative aspect-square w-full [transform-style:preserve-3d]">
-            {/* depth layers behind the board */}
-            <div className="absolute inset-0 rounded-xl bg-fuchsia-500/20 blur-2xl [transform:translateZ(-80px)]" />
-            <div className="absolute inset-0 rounded-xl border border-cyan-400/20 [transform:translateZ(-30px)]" />
-            <div className="absolute inset-0 rounded-xl border border-fuchsia-400/20 [transform:translateZ(-15px)]" />
-
-            <div className="board-frame absolute inset-0 overflow-hidden rounded-xl">
-              <canvas
-                ref={canvasRef}
-                role="img"
-                aria-label="Tabuleiro do jogo da cobrinha"
-                className="block h-full w-full touch-none"
-              />
-            </div>
-
-            {/* Corner brackets float in front for parallax */}
-            {['top-0 left-0 border-t-2 border-l-2', 'top-0 right-0 border-t-2 border-r-2',
-              'bottom-0 left-0 border-b-2 border-l-2', 'bottom-0 right-0 border-b-2 border-r-2'].map((cls) => (
-              <span
-                key={cls}
-                className={`pointer-events-none absolute h-8 w-8 border-cyan-300 drop-shadow-[0_0_6px_#22d3ee] ${cls} [transform:translateZ(40px)]`}
-                style={{ margin: -10 }}
-              />
-            ))}
-
-            {/* ---------- Overlays ---------- */}
-            {hud.mode !== 'playing' && (
-              <div className="overlay-in absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[#03040c]/70 p-6 text-center backdrop-blur-sm [transform:translateZ(60px)]">
-                {hud.mode === 'menu' && (
-                  <>
-                    <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-cyan-300/70 uppercase">
-                      Sistema pronto
-                    </div>
-                    <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-glow-cyan sm:text-5xl">
-                      INICIAR
-                    </h2>
-                    <div className="mb-6 flex gap-2">
-                      {[false, true].map((w) => (
-                        <button
-                          key={String(w)}
-                          onClick={() => {
-                            audio.unlock()
-                            audio.click()
-                            gameRef.current?.setWrap(w)
-                          }}
-                          className={`font-display rounded-md border px-3 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
-                            hud.wrap === w
-                              ? 'border-cyan-300 bg-cyan-300/15 text-white shadow-[0_0_16px_rgba(34,211,238,0.5)]'
-                              : 'border-white/10 text-white/50 hover:border-white/30'
-                          }`}
-                        >
-                          {w ? '◎ Portal' : '▣ Paredes'}
-                        </button>
-                      ))}
-                    </div>
-                    <NeonButton onClick={start}>Jogar</NeonButton>
-                    <Controls />
-                  </>
-                )}
-
-                {hud.mode === 'paused' && (
-                  <>
-                    <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-amber-200 sm:text-5xl">
-                      PAUSA
-                    </h2>
-                    <NeonButton onClick={pause}>Continuar</NeonButton>
-                    <p className="mt-4 font-mono text-[11px] tracking-widest text-white/40">
-                      ESPAÇO / P PARA RETOMAR
-                    </p>
-                  </>
-                )}
-
-                {hud.mode === 'over' && (
-                  <div className="overlay-in-delayed flex flex-col items-center">
-                    <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-rose-300/80 uppercase">
-                      Ligação perdida
-                    </div>
-                    <h2
-                      className="glitch font-display mb-4 text-3xl font-black tracking-widest text-rose-300 sm:text-5xl"
-                      data-text="GAME OVER"
-                    >
-                      GAME OVER
-                    </h2>
-                    <div className="mb-1 font-display text-4xl font-bold text-cyan-200 tabular-nums text-glow-cyan">
-                      {hud.score.toLocaleString('pt-PT')}
-                    </div>
-                    <div className="mb-6 font-mono text-xs tracking-widest text-white/50">
-                      {hud.newBest ? (
-                        <span className="animate-pulse text-amber-300">★ NOVO RECORDE ★</span>
-                      ) : (
-                        <>RECORDE {hud.best.toLocaleString('pt-PT')}</>
-                      )}
-                      <span className="mx-2">·</span>NÍVEL {hud.level}
-                      <span className="mx-2">·</span>TAMANHO {hud.length}
-                    </div>
-                    <NeonButton onClick={start}>Reiniciar</NeonButton>
-                    <button
-                      onClick={() => {
-                        audio.click()
-                        gameRef.current?.setWrap(!hud.wrap)
-                      }}
-                      className="mt-4 font-mono text-[11px] tracking-widest text-white/40 uppercase hover:text-white"
-                    >
-                      Modo: {hud.wrap ? 'Portal' : 'Paredes'} (trocar)
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
+      </header>
 
-        {/* ---------- Mobile D-pad ---------- */}
-        <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
-          {DPAD.map(({ dir, label, pos }) => (
-            <button
-              key={label}
-              onPointerDown={(e) => {
-                e.preventDefault()
-                audio.unlock()
-                turn(dir[0], dir[1])
-              }}
-              className={`${pos} dpad-btn font-display flex h-16 w-16 items-center justify-center rounded-xl text-xl text-cyan-200`}
-            >
-              {label}
-            </button>
+      <section className="mb-4 grid w-full max-w-[600px] grid-cols-4 gap-2 sm:mb-6 sm:gap-3">
+        <Stat label="Pontos" value={hud.score.toLocaleString('pt-PT')} accent="text-cyan-300 text-glow-cyan" />
+        <Stat label="Recorde" value={hud.best.toLocaleString('pt-PT')} accent="text-fuchsia-300 text-glow-fuchsia" />
+        <Stat label="Nível" value={hud.level} accent="text-amber-300" />
+        <Stat
+          label="Combo"
+          value={`x${multiplier}`}
+          accent={multiplier > 1 ? 'text-lime-300 animate-pulse' : 'text-white/40'}
+        />
+      </section>
+
+      {/* ---------- 3D Board ---------- */}
+      <div className="w-[min(100%,600px,calc(100dvh-400px))] min-w-65 perspective-[1400px] md:w-[min(100%,600px,calc(100dvh-230px))]">
+        <div ref={boardRef} className="board-3d relative aspect-square w-full [transform-style:preserve-3d]">
+          {/* depth layers behind the board */}
+          <div className="absolute inset-0 rounded-xl bg-fuchsia-500/20 blur-2xl [transform:translateZ(-80px)]" />
+          <div className="absolute inset-0 rounded-xl border border-cyan-400/20 [transform:translateZ(-30px)]" />
+          <div className="absolute inset-0 rounded-xl border border-fuchsia-400/20 [transform:translateZ(-15px)]" />
+
+          <div className="board-frame absolute inset-0 overflow-hidden rounded-xl">
+            <canvas
+              ref={canvasRef}
+              role="img"
+              aria-label="Tabuleiro do jogo da cobrinha"
+              className="block h-full w-full touch-none"
+            />
+          </div>
+
+          {/* Corner brackets float in front for parallax */}
+          {['top-0 left-0 border-t-2 border-l-2', 'top-0 right-0 border-t-2 border-r-2',
+            'bottom-0 left-0 border-b-2 border-l-2', 'bottom-0 right-0 border-b-2 border-r-2'].map((cls) => (
+            <span
+              key={cls}
+              className={`pointer-events-none absolute h-8 w-8 border-cyan-300 drop-shadow-[0_0_6px_#22d3ee] ${cls} [transform:translateZ(40px)]`}
+              style={{ margin: -10 }}
+            />
           ))}
+
+          {/* ---------- Overlays ---------- */}
+          {hud.mode !== 'playing' && (
+            <div className="overlay-in absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[#03040c]/70 p-6 text-center backdrop-blur-sm [transform:translateZ(60px)]">
+              {hud.mode === 'menu' && (
+                <>
+                  <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-cyan-300/70 uppercase">
+                    Sistema pronto
+                  </div>
+                  <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-glow-cyan sm:text-5xl">
+                    INICIAR
+                  </h2>
+                  <div className="mb-6 flex gap-2">
+                    {[false, true].map((w) => (
+                      <button
+                        key={String(w)}
+                        onClick={() => {
+                          audio.unlock()
+                          audio.click()
+                          gameRef.current?.setWrap(w)
+                        }}
+                        className={`font-display rounded-md border px-3 py-2 text-[11px] tracking-[0.2em] uppercase transition ${
+                          hud.wrap === w
+                            ? 'border-cyan-300 bg-cyan-300/15 text-white shadow-[0_0_16px_rgba(34,211,238,0.5)]'
+                            : 'border-white/10 text-white/50 hover:border-white/30'
+                        }`}
+                      >
+                        {w ? '◎ Portal' : '▣ Paredes'}
+                      </button>
+                    ))}
+                  </div>
+                  <NeonButton onClick={start}>Jogar</NeonButton>
+                  <Controls />
+                </>
+              )}
+
+              {hud.mode === 'paused' && (
+                <>
+                  <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-amber-200 sm:text-5xl">
+                    PAUSA
+                  </h2>
+                  <NeonButton onClick={pause}>Continuar</NeonButton>
+                  <p className="mt-4 font-mono text-[11px] tracking-widest text-white/40">
+                    ESPAÇO / P PARA RETOMAR
+                  </p>
+                </>
+              )}
+
+              {hud.mode === 'over' && (
+                <div className="overlay-in-delayed flex flex-col items-center">
+                  <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-rose-300/80 uppercase">
+                    Ligação perdida
+                  </div>
+                  <h2
+                    className="glitch font-display mb-4 text-3xl font-black tracking-widest text-rose-300 sm:text-5xl"
+                    data-text="GAME OVER"
+                  >
+                    GAME OVER
+                  </h2>
+                  <div className="mb-1 font-display text-4xl font-bold text-cyan-200 tabular-nums text-glow-cyan">
+                    {hud.score.toLocaleString('pt-PT')}
+                  </div>
+                  <div className="mb-6 font-mono text-xs tracking-widest text-white/50">
+                    {hud.newBest ? (
+                      <span className="animate-pulse text-amber-300">★ NOVO RECORDE ★</span>
+                    ) : (
+                      <>RECORDE {hud.best.toLocaleString('pt-PT')}</>
+                    )}
+                    <span className="mx-2">·</span>NÍVEL {hud.level}
+                    <span className="mx-2">·</span>TAMANHO {hud.length}
+                  </div>
+                  <NeonButton onClick={start}>Reiniciar</NeonButton>
+                  <button
+                    onClick={() => {
+                      audio.click()
+                      gameRef.current?.setWrap(!hud.wrap)
+                    }}
+                    className="mt-4 font-mono text-[11px] tracking-widest text-white/40 uppercase hover:text-white"
+                  >
+                    Modo: {hud.wrap ? 'Portal' : 'Paredes'} (trocar)
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* ---------- Mobile D-pad ---------- */}
+      <div className="mt-8 grid grid-cols-3 gap-2 md:hidden">
+        {DPAD.map(({ dir, label, pos }) => (
+          <button
+            key={label}
+            onPointerDown={(e) => {
+              e.preventDefault()
+              audio.unlock()
+              turn(dir[0], dir[1])
+            }}
+            className={`${pos} dpad-btn font-display flex h-16 w-16 items-center justify-center rounded-xl text-xl text-cyan-200`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </main>
   )
 }
 

@@ -113,6 +113,8 @@ export class SnakeGame {
   destroy() {
     cancelAnimationFrame(this.raf)
     this.resizeObserver.disconnect()
+    // Leaving the route mid-game must not leave the music running
+    audio.stopMusic()
   }
 
   // ---------------- Public controls ----------------

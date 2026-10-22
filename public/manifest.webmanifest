@@ -1,7 +1,7 @@
 {
-  "name": "Neon Snake — Jogo da Cobrinha",
-  "short_name": "Neon Snake",
-  "description": "O clássico jogo da cobrinha com visual neon futurista.",
+  "name": "Kitumba Games",
+  "short_name": "Kitumba Games",
+  "description": "Jogos arcade com visual neon, grátis no browser.",
   "lang": "pt",
   "start_url": "/",
   "display": "standalone",
