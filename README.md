@@ -30,12 +30,20 @@ O nome vem de quem os faz: Kitumba.
 | Jogo | Rota | Descrição | Documentação |
 |---|---|---|---|
 | **Kitumba Snake** | `/snake` | O clássico jogo da cobrinha com visual neon, combos, bónus dourado, níveis e música synthwave | [docs/games/kitumba-snake](docs/games/kitumba-snake/README.md) |
+| **Kitumba Racer** | `/racer` | Corrida numa autoestrada neon: foge ao trânsito, usa o turbo, apanha diamantes e passa rente aos carros | [docs/games/kitumba-racer](docs/games/kitumba-racer/README.md) |
 
 Mais jogos vão entrar nesta lista.
 
-<p align="center">
-  <img src="docs/games/kitumba-snake/screenshots/gameplay.png" alt="Kitumba Snake em jogo" width="420" />
-</p>
+<table>
+  <tr>
+    <td width="50%"><img src="docs/games/kitumba-snake/screenshots/gameplay.png" alt="Kitumba Snake em jogo" /></td>
+    <td width="50%"><img src="docs/games/kitumba-racer/screenshots/gameplay.png" alt="Kitumba Racer em jogo" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Kitumba Snake</b></td>
+    <td align="center"><b>Kitumba Racer</b></td>
+  </tr>
+</table>
 
 ## Começar
 

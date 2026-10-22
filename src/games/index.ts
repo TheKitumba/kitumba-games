@@ -25,4 +25,14 @@ export const games: GameEntry[] = [
     tags: ['Arcade', 'Teclado', 'Tátil'],
     Component: lazy(() => import('./snake/SnakePage')),
   },
+  {
+    slug: 'racer',
+    title: 'Kitumba Racer',
+    tagline: 'Autoestrada // Neon',
+    description:
+      'Corrida numa autoestrada neon: muda de faixa para fugir ao trânsito, usa o turbo, apanha diamantes e passa rente aos carros para ganhar pontos.',
+    accent: 'from-amber-300 to-rose-500',
+    tags: ['Corrida', 'Teclado', 'Tátil'],
+    Component: lazy(() => import('./racer/RacerPage')),
+  },
 ]
