@@ -35,4 +35,14 @@ export const games: GameEntry[] = [
     tags: ['Corrida', 'Teclado', 'Tátil'],
     Component: lazy(() => import('./racer/RacerPage')),
   },
+  {
+    slug: 'football',
+    title: 'Kitumba Football',
+    tagline: 'Estádio // Neon',
+    description:
+      'Futebol arcade visto de cima contra o CPU: dribla, chuta, passa pelo guarda-redes e sobe de divisão a cada vitória.',
+    accent: 'from-lime-300 to-cyan-500',
+    tags: ['Desporto', 'Teclado', 'Tátil'],
+    Component: lazy(() => import('./football/FootballPage')),
+  },
 ]

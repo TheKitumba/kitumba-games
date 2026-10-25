@@ -31,17 +31,20 @@ O nome vem de quem os faz: Kitumba.
 |---|---|---|---|
 | **Kitumba Snake** | `/snake` | O clássico jogo da cobrinha com visual neon, combos, bónus dourado, níveis e música synthwave | [docs/games/kitumba-snake](docs/games/kitumba-snake/README.md) |
 | **Kitumba Racer** | `/racer` | Corrida numa autoestrada neon: foge ao trânsito, usa o turbo, apanha diamantes e passa rente aos carros | [docs/games/kitumba-racer](docs/games/kitumba-racer/README.md) |
+| **Kitumba Football** | `/football` | Futebol arcade contra o CPU: dribla, chuta, passa pelo guarda-redes e sobe de divisão a cada vitória | [docs/games/kitumba-football](docs/games/kitumba-football/README.md) |
 
 Mais jogos vão entrar nesta lista.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/games/kitumba-snake/screenshots/gameplay.png" alt="Kitumba Snake em jogo" /></td>
-    <td width="50%"><img src="docs/games/kitumba-racer/screenshots/gameplay.png" alt="Kitumba Racer em jogo" /></td>
+    <td width="33%"><img src="docs/games/kitumba-snake/screenshots/gameplay.png" alt="Kitumba Snake em jogo" /></td>
+    <td width="33%"><img src="docs/games/kitumba-racer/screenshots/gameplay.png" alt="Kitumba Racer em jogo" /></td>
+    <td width="33%"><img src="docs/games/kitumba-football/screenshots/gameplay.png" alt="Kitumba Football em jogo" /></td>
   </tr>
   <tr>
     <td align="center"><b>Kitumba Snake</b></td>
     <td align="center"><b>Kitumba Racer</b></td>
+    <td align="center"><b>Kitumba Football</b></td>
   </tr>
 </table>
 
@@ -70,4 +73,6 @@ O resultado é um site estático em `dist/`. Como a app usa rotas reais (`/snake
 Tudo o que é técnico está em [docs/](docs/README.md):
 
 - [Adicionar um jogo](docs/adicionar-um-jogo.md): estrutura das rotas, registo de jogos e publicação;
-- [Kitumba Snake](docs/games/kitumba-snake/README.md): regras, pontuação, controlos, arquitetura e comportamentos conhecidos.
+- [Kitumba Snake](docs/games/kitumba-snake/README.md): regras, pontuação, controlos, arquitetura e comportamentos conhecidos;
+- [Kitumba Racer](docs/games/kitumba-racer/README.md): regras, pontuação, controlos e arquitetura;
+- [Kitumba Football](docs/games/kitumba-football/README.md): regras, divisões, controlos e arquitetura.
