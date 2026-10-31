@@ -16,7 +16,8 @@ src/
     ├── index.ts          # Registo de todos os jogos
     ├── snake/            # Kitumba Snake
     ├── racer/            # Kitumba Racer
-    └── football/         # Kitumba Football
+    ├── football/         # Kitumba Football
+    └── blaster/          # Kitumba Blaster (Three.js)
 ```
 
 | Rota | Página |
@@ -25,6 +26,7 @@ src/
 | `/snake` | Kitumba Snake |
 | `/racer` | Kitumba Racer |
 | `/football` | Kitumba Football |
+| `/blaster` | Kitumba Blaster |
 | qualquer outra | 404 "Sinal perdido" |
 
 O routing usa [React Router](https://reactrouter.com/) em modo browser (`createBrowserRouter`), com URLs limpos sem `#`.

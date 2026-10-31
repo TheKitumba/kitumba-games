@@ -45,4 +45,14 @@ export const games: GameEntry[] = [
     tags: ['Desporto', 'Teclado', 'Tátil'],
     Component: lazy(() => import('./football/FootballPage')),
   },
+  {
+    slug: 'blaster',
+    title: 'Kitumba Blaster',
+    tagline: 'Arena // 3D',
+    description:
+      'Tiros numa arena 3D em Three.js: sobrevive a ondas de drones, investidas e atiradores, faz combos até x8 e usa o dash para escapar.',
+    accent: 'from-violet-400 to-cyan-400',
+    tags: ['Tiros', '3D', 'Teclado', 'Rato', 'Tátil'],
+    Component: lazy(() => import('./blaster/BlasterPage')),
+  },
 ]

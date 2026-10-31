@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 
 // Public routes listed in the sitemap. Keep in sync with the slugs in src/games/index.ts
-const ROUTES = ['/', '/snake', '/racer', '/football']
+const ROUTES = ['/', '/snake', '/racer', '/football', '/blaster']
 
 // Emits robots.txt and sitemap.xml pointing at the deployed site URL
 function seoFiles(siteUrl: string): Plugin {
