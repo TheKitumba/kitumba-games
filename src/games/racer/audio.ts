@@ -9,7 +9,7 @@ class AudioEngine {
   private noiseBuffer!: AudioBuffer
 
   // Continuous engine drone, alive only while driving
-  private engine: { oscs: OscillatorNode[]; filter: BiquadFilterNode; gain: GainNode } | null = null
+  private engine: { oscs: OscillatorNode[]; filter: BiquadFilterNode; gain: GainNode; pitch: number } | null = null
 
   muted = false
 
@@ -111,7 +111,8 @@ class AudioEngine {
 
   // ---------- Engine drone ----------
 
-  startEngine() {
+  /** `pitch` scales the drone: above 1 for a buzzy bike, below 1 for a heavy diesel. */
+  startEngine(pitch = 1) {
     const ctx = this.ensure()
     if (this.engine) return
     const filter = ctx.createBiquadFilter()
@@ -124,20 +125,20 @@ class AudioEngine {
     const oscs = (['sawtooth', 'square'] as const).map((type, i) => {
       const osc = ctx.createOscillator()
       osc.type = type
-      osc.frequency.value = i ? 30 : 60
+      osc.frequency.value = (i ? 30 : 60) * pitch
       osc.connect(filter)
       osc.start()
       return osc
     })
     filter.connect(gain).connect(this.sfxBus)
-    this.engine = { oscs, filter, gain }
+    this.engine = { oscs, filter, gain, pitch }
   }
 
   /** `rev` goes from 0 (idle) to 1 (top speed with boost). */
   setEngine(rev: number) {
     if (!this.ctx || !this.engine) return
     const t = this.ctx.currentTime
-    const f = 55 + rev * 110
+    const f = (55 + rev * 110) * this.engine.pitch
     this.engine.oscs[0].frequency.setTargetAtTime(f, t, 0.08)
     this.engine.oscs[1].frequency.setTargetAtTime(f / 2, t, 0.08)
     this.engine.filter.frequency.setTargetAtTime(500 + rev * 1800, t, 0.08)

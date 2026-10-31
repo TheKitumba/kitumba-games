@@ -1,14 +1,22 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { audio } from './audio'
-import { RacerGame, type HudState } from './engine'
+import { RacerGame, VEHICLE_KINDS, VEHICLES, type HudState, type VehicleKind } from './engine'
 
 const LEFT_KEYS = ['ArrowLeft', 'KeyA']
 const RIGHT_KEYS = ['ArrowRight', 'KeyD']
 const BOOST_KEYS = ['ArrowUp', 'KeyW', 'ShiftLeft', 'ShiftRight']
+const VEHICLE_KEYS = ['Digit1', 'Digit2', 'Digit3']
+
+const VEHICLE_INFO: Record<VehicleKind, { icon: string; trait: string }> = {
+  car: { icon: '🚗', trait: 'Equilibrado' },
+  moto: { icon: '🏍️', trait: 'Estreita e ágil' },
+  truck: { icon: '🚚', trait: 'Lento e enorme' },
+}
 
 const initialHud: HudState = {
   mode: 'menu',
+  vehicle: 'car',
   score: 0,
   best: 0,
   level: 1,
@@ -72,6 +80,7 @@ export default function RacerPage() {
   const pause = useCallback(() => gameRef.current?.togglePause(), [])
   const steer = useCallback((dir: -1 | 1) => gameRef.current?.steer(dir), [])
   const boost = useCallback((on: boolean) => gameRef.current?.setBoost(on), [])
+  const chooseVehicle = useCallback((kind: VehicleKind) => gameRef.current?.setVehicle(kind), [])
 
   const toggleMute = useCallback(() => {
     setMuted((m) => {
@@ -82,10 +91,23 @@ export default function RacerPage() {
 
   // Keyboard
   useEffect(() => {
+    const choosing = hud.mode === 'menu' || hud.mode === 'over'
     const onDown = (e: KeyboardEvent) => {
       if (LEFT_KEYS.includes(e.code) || RIGHT_KEYS.includes(e.code)) {
         e.preventDefault()
-        if (!e.repeat) steer(LEFT_KEYS.includes(e.code) ? -1 : 1)
+        if (e.repeat) return
+        const dir = LEFT_KEYS.includes(e.code) ? -1 : 1
+        if (choosing) {
+          // Between runs the arrows cycle through the vehicles
+          const i = VEHICLE_KINDS.indexOf(hud.vehicle)
+          chooseVehicle(VEHICLE_KINDS[(i + dir + VEHICLE_KINDS.length) % VEHICLE_KINDS.length])
+          audio.unlock()
+          audio.click()
+        } else steer(dir)
+      } else if (choosing && VEHICLE_KEYS.includes(e.code)) {
+        chooseVehicle(VEHICLE_KINDS[VEHICLE_KEYS.indexOf(e.code)])
+        audio.unlock()
+        audio.click()
       } else if (BOOST_KEYS.includes(e.code)) {
         e.preventDefault()
         boost(true)
@@ -109,7 +131,7 @@ export default function RacerPage() {
       window.removeEventListener('keydown', onDown)
       window.removeEventListener('keyup', onUp)
     }
-  }, [boost, hud.mode, pause, start, steer, toggleMute])
+  }, [boost, chooseVehicle, hud.mode, hud.vehicle, pause, start, steer, toggleMute])
 
   // Auto-pause when the tab loses focus
   useEffect(() => {
@@ -207,9 +229,10 @@ export default function RacerPage() {
                   <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-cyan-300/70 uppercase">
                     Motor pronto
                   </div>
-                  <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-glow-cyan sm:text-5xl">
+                  <h2 className="font-display mb-5 text-3xl font-black tracking-widest text-glow-cyan sm:text-5xl">
                     ACELERAR
                   </h2>
+                  <VehiclePicker value={hud.vehicle} onChange={chooseVehicle} />
                   <NeonButton onClick={start}>Arrancar</NeonButton>
                   <Controls />
                 </>
@@ -249,6 +272,7 @@ export default function RacerPage() {
                     )}
                     <span className="mx-2">·</span>NÍVEL {hud.level}
                   </div>
+                  <VehiclePicker value={hud.vehicle} onChange={chooseVehicle} compact />
                   <NeonButton onClick={start}>Reiniciar</NeonButton>
                 </div>
               )}
@@ -297,9 +321,64 @@ export default function RacerPage() {
   )
 }
 
+function VehiclePicker({
+  value,
+  onChange,
+  compact = false,
+}: {
+  value: VehicleKind
+  onChange: (kind: VehicleKind) => void
+  compact?: boolean
+}) {
+  return (
+    <div role="radiogroup" aria-label="Escolher veículo" className="mb-6 grid w-full max-w-xs grid-cols-3 gap-2">
+      {VEHICLE_KINDS.map((kind) => {
+        const spec = VEHICLES[kind]
+        const active = kind === value
+        return (
+          <button
+            key={kind}
+            role="radio"
+            aria-checked={active}
+            onClick={() => {
+              audio.unlock()
+              audio.click()
+              onChange(kind)
+            }}
+            className={`flex flex-col items-center rounded-lg border px-1 transition ${compact ? 'py-1.5' : 'py-2.5'} ${
+              active
+                ? 'border-cyan-300/80 bg-cyan-300/15 text-white shadow-[0_0_18px_rgba(103,232,249,0.35)]'
+                : 'border-white/10 bg-white/5 text-white/60 hover:border-cyan-300/40 hover:text-white'
+            }`}
+          >
+            <span className={compact ? 'text-xl' : 'text-2xl sm:text-3xl'} aria-hidden>
+              {VEHICLE_INFO[kind].icon}
+            </span>
+            <span className="font-display mt-1 text-[10px] font-bold tracking-[0.2em] uppercase sm:text-xs">
+              {spec.name}
+            </span>
+            {!compact && (
+              <>
+                <span className="mt-1 font-mono text-[9px] leading-tight tracking-wide text-white/45">
+                  {VEHICLE_INFO[kind].trait}
+                </span>
+                <span className="mt-0.5 font-mono text-[9px] tracking-wide text-amber-300/80">
+                  pontos ×{spec.points.toLocaleString('pt-PT')}
+                </span>
+              </>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function Controls() {
   return (
     <div className="mt-8 hidden grid-cols-2 gap-x-6 gap-y-1 text-left font-mono text-[11px] tracking-wider text-white/45 sm:grid">
+      <span className="text-cyan-200/80">1 2 3</span>
+      <span>escolher veículo</span>
       <span className="text-cyan-200/80">← → / A D</span>
       <span>mudar de faixa</span>
       <span className="text-cyan-200/80">↑ / W / SHIFT</span>

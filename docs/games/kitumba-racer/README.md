@@ -44,6 +44,7 @@ O teu carro (ciano) anda sempre para a frente. O trânsito vai mais devagar e ap
 
 | Ação | Teclado | Telemóvel / tátil |
 |---|---|---|
+| Escolher veículo (no menu ou após colisão) | `1` `2` `3` ou `←` `→` | Tocar no veículo |
 | Mudar de faixa | `←` `→` ou `A` `D` | Swipe na estrada ou botões `◀` `▶` |
 | Turbo (manter) | `↑`, `W` ou `Shift` | Manter o botão `⚡` |
 | Começar / reiniciar | `Enter` ou `Espaço` | Botão **Arrancar** / **Reiniciar** |
@@ -64,8 +65,19 @@ Os valores vêm das constantes no topo de [src/games/racer/engine.ts](../../../s
 |---|---|
 | Faixas | **4** |
 | Faixa inicial | 2.ª a contar da esquerda |
-| Tamanho dos carros | 0,56 × 1 faixa |
-| Mudança de faixa | Deslizamento a 9 faixas/s (cerca de 0,11 s por faixa) |
+| Tamanho dos carros do trânsito | 0,56 × 1 faixa |
+
+### Veículos
+
+Escolhe o veículo no menu ou no ecrã de colisão. A escolha fica guardada no `localStorage` (`kitumba-racer:vehicle`) e cada veículo tem o seu próprio recorde.
+
+| Veículo | Tamanho | Mudança de faixa | Velocidade | Pontos | Som do motor |
+|---|---|---|---|---|---|
+| 🚗 Carro | 0,56 × 1 | 9 faixas/s | ×1 | ×1 | normal |
+| 🏍️ Mota | 0,28 × 0,78 | 13 faixas/s | ×1,15 | ×1,2 | agudo |
+| 🚚 Camião | 0,74 × 1,7 | 6 faixas/s | ×0,85 | ×1,5 | grave |
+
+O multiplicador de pontos aplica-se à distância, aos diamantes e aos raspões. O espaçamento do trânsito e a margem da "saída garantida" crescem com o comprimento do veículo, para que o camião também tenha sempre por onde passar.
 
 ### Velocidade
 
@@ -103,7 +115,7 @@ Os valores vêm das constantes no topo de [src/games/racer/engine.ts](../../../s
 
 - Os diamantes aparecem a cada 1,8 a 3,8 s numa faixa aleatória e estão parados na estrada.
 - Um raspão conta quando um carro acaba de passar por ti estando a menos de 1,1 faixas de distância lateral, ou seja, na faixa colada à tua.
-- O recorde fica no `localStorage`, na chave `kitumba-racer:best`, e atualiza em tempo real.
+- O recorde fica no `localStorage`, um por veículo: `kitumba-racer:best` (carro), `kitumba-racer:best:moto` e `kitumba-racer:best:truck`. Atualiza em tempo real.
 
 ---
 
@@ -146,6 +158,7 @@ A estrutura é igual à do [Kitumba Snake](../kitumba-snake/README.md#arquitetur
   | `togglePause()` | Alterna entre `playing` ↔ `paused` |
   | `steer(-1 \| 1)` | Muda uma faixa para a esquerda ou para a direita |
   | `setBoost(bool)` | Liga ou desliga o turbo |
+  | `setVehicle(kind)` | Troca de veículo (`car`, `moto`, `truck`); só funciona no menu ou após a colisão |
   | `destroy()` | Pára o loop, o `ResizeObserver` e o motor |
 
 - O HUD só é enviado ao React quando muda. A velocidade é arredondada a 5 km/h para não provocar uma renderização por frame durante a aceleração.
@@ -164,7 +177,7 @@ Constantes no topo de [src/games/racer/engine.ts](../../../src/games/racer/engin
 | `LANE_SPEEDS` | `[1.2, 1.8, 2.4, 3]` | Velocidade do trânsito em cada faixa |
 | `BASE_SPEED` / `MAX_SPEED` | 6 / 13 | Velocidade inicial e máxima (sem turbo) |
 | `BOOST` | 1.45 | Multiplicador do turbo |
-| `STEER_SPEED` | 9 | Rapidez da mudança de faixa |
+| `VEHICLES` | ver [Veículos](#veículos) | Tamanho, direção, velocidade, pontos, som e cor de cada veículo |
 | `LEVEL_DISTANCE` | 260 | Distância por nível |
 | `HITBOX_INSET` | 0.07 | Margem de tolerância da colisão |
 
