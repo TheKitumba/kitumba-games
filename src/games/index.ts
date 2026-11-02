@@ -40,7 +40,7 @@ export const games: GameEntry[] = [
     title: 'Kitumba Football',
     tagline: 'Estádio // Neon',
     description:
-      'Futebol arcade visto de cima contra o CPU: dribla, chuta, passa pelo guarda-redes e sobe de divisão a cada vitória.',
+      'Futebol 3D de 11 contra 11 num estádio neon: passa, remata, desarma e troca de jogador. Sobe de divisão a cada vitória.',
     accent: 'from-lime-300 to-cyan-500',
     tags: ['Desporto', 'Teclado', 'Tátil'],
     Component: lazy(() => import('./football/FootballPage')),

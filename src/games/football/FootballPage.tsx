@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { audio } from './audio'
-import { FootballGame, type HudState } from './engine'
+import { FootballGame, type Action, type HudState } from './engine'
 
 const MOVE_KEYS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -13,7 +13,16 @@ const MOVE_KEYS: Record<string, [number, number]> = {
   ArrowRight: [1, 0],
   KeyD: [1, 0],
 }
-const KICK_KEYS = ['Space', 'KeyK', 'KeyX']
+const ACTION_KEYS: Record<string, Action> = {
+  Space: 'pass',
+  KeyJ: 'pass',
+  KeyK: 'shoot',
+  KeyX: 'shoot',
+  KeyL: 'through',
+  KeyC: 'through',
+  ShiftLeft: 'sprint',
+  ShiftRight: 'sprint',
+}
 
 const initialHud: HudState = {
   mode: 'menu',
@@ -25,6 +34,8 @@ const initialHud: HudState = {
   best: 0,
   result: null,
   newBest: false,
+  attacking: true,
+  possession: 50,
 }
 
 const RESULT_TEXT = {
@@ -73,19 +84,20 @@ function NeonButton({
 
 export default function FootballPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const overlayRef = useRef<HTMLCanvasElement>(null)
   const gameRef = useRef<FootballGame | null>(null)
   const [hud, setHud] = useState<HudState>(initialHud)
   const [muted, setMuted] = useState(audio.muted)
 
   useEffect(() => {
-    const game = new FootballGame(canvasRef.current!, setHud)
+    const game = new FootballGame(canvasRef.current!, overlayRef.current!, setHud)
     gameRef.current = game
     return () => game.destroy()
   }, [])
 
   const start = useCallback(() => gameRef.current?.start(), [])
   const pause = useCallback(() => gameRef.current?.togglePause(), [])
-  const kick = useCallback(() => gameRef.current?.kick(), [])
+  const act = useCallback((a: Action, down: boolean) => gameRef.current?.press(a, down), [])
   const move = useCallback((x: number, y: number) => gameRef.current?.setInput(x, y), [])
 
   const toggleMute = useCallback(() => {
@@ -113,12 +125,12 @@ export default function FootballPage() {
         e.preventDefault()
         held.add(e.code)
         sync()
-      } else if (KICK_KEYS.includes(e.code)) {
+      } else if (e.code in ACTION_KEYS) {
         e.preventDefault()
         if (e.repeat) return
         if (idle) {
           if (e.code === 'Space') start()
-        } else if (hud.mode === 'playing') kick()
+        } else if (hud.mode === 'playing') act(ACTION_KEYS[e.code], true)
       } else if (e.code === 'KeyP' || e.code === 'Escape') {
         e.preventDefault()
         if (!idle) pause()
@@ -130,10 +142,12 @@ export default function FootballPage() {
     }
     const onUp = (e: KeyboardEvent) => {
       if (held.delete(e.code)) sync()
+      else if (e.code in ACTION_KEYS) act(ACTION_KEYS[e.code], false)
     }
     const onBlur = () => {
       held.clear()
       sync()
+      for (const a of new Set(Object.values(ACTION_KEYS))) act(a, false)
     }
     window.addEventListener('keydown', onDown)
     window.addEventListener('keyup', onUp)
@@ -144,7 +158,7 @@ export default function FootballPage() {
       window.removeEventListener('blur', onBlur)
       move(0, 0)
     }
-  }, [hud.mode, kick, move, pause, start, toggleMute])
+  }, [hud.mode, act, move, pause, start, toggleMute])
 
   // Auto-pause when the tab loses focus
   useEffect(() => {
@@ -199,28 +213,29 @@ export default function FootballPage() {
       </section>
 
       {/* ---------- Pitch ---------- */}
-      <div className="w-[min(100%,440px,calc((100dvh-420px)*0.75))] min-w-60 perspective-[1200px] md:w-[min(100%,440px,calc((100dvh-230px)*0.75))]">
-        <div className="relative aspect-[3/4] w-full [transform-style:preserve-3d] [transform:rotateX(14deg)]">
-          <div className="absolute inset-0 rounded-xl bg-cyan-500/20 blur-2xl [transform:translateZ(-80px)]" />
+      <div className="w-[min(100%,480px,calc((100dvh-440px)*0.75))] min-w-60 md:w-[min(100%,480px,calc((100dvh-230px)*0.75))]">
+        <div className="relative aspect-[3/4] w-full">
+          <div className="absolute inset-0 rounded-xl bg-cyan-500/20 blur-2xl" />
           <div className="board-frame absolute inset-0 overflow-hidden rounded-xl">
             <canvas
               ref={canvasRef}
               role="img"
-              aria-label="Campo do jogo de futebol"
+              aria-label="Estádio com as duas equipas de onze jogadores"
               className="block h-full w-full touch-none"
             />
+            <canvas ref={overlayRef} aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" />
           </div>
 
           {/* ---------- Overlays ---------- */}
           {hud.mode !== 'playing' && (
-            <div className="overlay-in absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[#03040c]/70 p-6 text-center backdrop-blur-sm [transform:translateZ(60px)]">
+            <div className="overlay-in absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-[#03040c]/70 p-6 text-center backdrop-blur-sm">
               {hud.mode === 'menu' && (
                 <>
                   <div className="mb-2 font-mono text-[10px] tracking-[0.5em] text-cyan-300/70 uppercase">
                     Estádio cheio
                   </div>
                   <h2 className="font-display mb-6 text-3xl font-black tracking-widest text-glow-cyan sm:text-5xl">
-                    A JOGO
+                    11 CONTRA 11
                   </h2>
                   <NeonButton onClick={start}>Apito inicial</NeonButton>
                   <Controls />
@@ -251,6 +266,9 @@ export default function FootballPage() {
                   <div className="mb-1 font-display text-4xl font-bold text-cyan-200 tabular-nums text-glow-cyan">
                     {hud.home} - {hud.away}
                   </div>
+                  <div className="mb-3 font-mono text-[11px] tracking-widest text-white/50">
+                    POSSE DE BOLA {hud.possession}% - {100 - hud.possession}%
+                  </div>
                   <div className="mb-6 font-mono text-xs tracking-widest text-white/50">
                     {hud.newBest ? (
                       <span className="animate-pulse text-amber-300">★ NOVO RECORDE: {hud.best} SEGUIDAS ★</span>
@@ -271,20 +289,55 @@ export default function FootballPage() {
       </div>
 
       {/* ---------- Mobile controls ---------- */}
-      <div className="mt-8 flex w-full max-w-[440px] items-center justify-between px-2 md:hidden">
+      <div className="mt-6 flex w-full max-w-[480px] items-center justify-between px-1 md:hidden">
         <Joystick onMove={move} />
-        <button
-          onPointerDown={(e) => {
-            e.preventDefault()
-            audio.unlock()
-            kick()
-          }}
-          className="dpad-btn font-display flex h-24 w-24 items-center justify-center rounded-full text-sm font-bold tracking-widest text-amber-200"
-        >
-          CHUTAR
-        </button>
+        <div className="relative h-40 w-52 shrink-0">
+          <PadButton action="sprint" onAct={act} className="bottom-0 left-0 h-14 w-14 text-lime-200">
+            SPRINT
+          </PadButton>
+          <PadButton action="pass" onAct={act} className="bottom-1 left-16 h-16 w-16 text-cyan-200">
+            {hud.attacking ? 'PASSE' : 'TROCAR'}
+          </PadButton>
+          <PadButton action="shoot" onAct={act} className="right-0 bottom-10 h-20 w-20 text-amber-200">
+            {hud.attacking ? 'REMATE' : 'CARRINHO'}
+          </PadButton>
+          <PadButton action="through" onAct={act} className="top-0 left-12 h-16 w-16 text-fuchsia-200">
+            {hud.attacking ? 'EM PROF.' : 'PRESSÃO'}
+          </PadButton>
+        </div>
       </div>
     </main>
+  )
+}
+
+/** A round action button that reports both press and release (shots charge while held). */
+function PadButton({
+  action,
+  onAct,
+  className,
+  children,
+}: {
+  action: Action
+  onAct: (a: Action, down: boolean) => void
+  className: string
+  children: ReactNode
+}) {
+  const up = () => onAct(action, false)
+  return (
+    <button
+      onPointerDown={(e) => {
+        e.preventDefault()
+        e.currentTarget.setPointerCapture(e.pointerId)
+        audio.unlock()
+        onAct(action, true)
+      }}
+      onPointerUp={up}
+      onPointerCancel={up}
+      onContextMenu={(e) => e.preventDefault()}
+      className={`dpad-btn font-display absolute flex items-center justify-center rounded-full text-[9px] font-bold tracking-wider select-none ${className}`}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -341,17 +394,21 @@ function Controls() {
   return (
     <div className="mt-8 hidden grid-cols-2 gap-x-6 gap-y-1 text-left font-mono text-[11px] tracking-wider text-white/45 sm:grid">
       <span className="text-cyan-200/80">↑ ↓ ← → / WASD</span>
-      <span>correr (empurra a bola)</span>
-      <span className="text-cyan-200/80">ESPAÇO / K</span>
-      <span>chutar</span>
+      <span>correr e conduzir</span>
+      <span className="text-cyan-200/80">SHIFT</span>
+      <span>sprint (gasta energia)</span>
+      <span className="text-cyan-200/80">ESPAÇO / J</span>
+      <span>passe · trocar jogador</span>
+      <span className="text-cyan-200/80">K (manter)</span>
+      <span>remate · carrinho</span>
+      <span className="text-cyan-200/80">L</span>
+      <span>passe em profundidade · pressão</span>
       <span className="text-cyan-200/80">P / ESC</span>
       <span>pausa</span>
       <span className="text-cyan-200/80">M</span>
       <span>som</span>
-      <span className="text-fuchsia-300/80">baliza de cima</span>
+      <span className="text-fuchsia-300/80">baliza do fundo</span>
       <span>é onde marcas</span>
-      <span className="text-amber-300/80">vitória</span>
-      <span>sobe de divisão</span>
     </div>
   )
 }

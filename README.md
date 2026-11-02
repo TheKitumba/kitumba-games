@@ -31,7 +31,7 @@ O nome vem de quem os faz: Kitumba.
 |---|---|---|---|
 | **Kitumba Snake** | `/snake` | O clássico jogo da cobrinha com visual neon, combos, bónus dourado, níveis e música synthwave | [docs/games/kitumba-snake](docs/games/kitumba-snake/README.md) |
 | **Kitumba Racer** | `/racer` | Corrida numa autoestrada neon: foge ao trânsito, usa o turbo, apanha diamantes e passa rente aos carros | [docs/games/kitumba-racer](docs/games/kitumba-racer/README.md) |
-| **Kitumba Football** | `/football` | Futebol arcade contra o CPU: dribla, chuta, passa pelo guarda-redes e sobe de divisão a cada vitória | [docs/games/kitumba-football](docs/games/kitumba-football/README.md) |
+| **Kitumba Football** | `/football` | Futebol 3D de 11 contra 11: passa, remata, desarma e troca de jogador; sobe de divisão a cada vitória | [docs/games/kitumba-football](docs/games/kitumba-football/README.md) |
 | **Kitumba Blaster** | `/blaster` | Tiros numa arena 3D (Three.js): sobrevive a ondas de inimigos, faz combos e usa o dash para escapar | [docs/games/kitumba-blaster](docs/games/kitumba-blaster/README.md) |
 
 Mais jogos vão entrar nesta lista.
