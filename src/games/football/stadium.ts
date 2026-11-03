@@ -11,6 +11,7 @@ import {
   RepeatWrapping,
   SRGBColorSpace,
 } from 'three'
+import grassUrl from './assets/pitch-grass-basecolor.png'
 
 // Static scenery, built once. Pitch coordinates are centred: x across, z along, y up, in metres.
 
@@ -45,27 +46,54 @@ const texture = (c: HTMLCanvasElement, aniso: number) => {
   return t
 }
 
-/** Mowed grass with the markings painted on, apron included. */
+/**
+ * Mowed grass with the markings painted on, apron included. The markings are always drawn here at the
+ * real dimensions; the grass under them is painted procedurally, then swapped for the grass texture
+ * (8 mowing bands per tile, so two tiles make the 16 bands of the pitch) once it loads.
+ */
 function pitchTexture(p: PitchSpec, aniso: number) {
   const W = (p.w + APRON * 2) * PX
   const H = (p.h + APRON * 2) * PX
   const [c, g] = canvas(W, H)
+  const tex = texture(c, aniso)
+  // The noise is random, so it's drawn once and reused when the grass is repainted
+  const [noise, ng] = canvas(W, H)
+  for (let i = 0; i < 60000; i++) {
+    const light = Math.random() < 0.5
+    ng.fillStyle = light ? 'rgba(180, 255, 170, 0.05)' : 'rgba(0, 30, 0, 0.08)'
+    ng.fillRect(Math.random() * W, Math.random() * H, 1, 2 + Math.random() * 3)
+  }
+  paintPitch(g, p, null, noise)
+  const img = new Image()
+  img.onload = () => {
+    paintPitch(g, p, img, noise)
+    tex.needsUpdate = true
+  }
+  img.src = grassUrl
+  return tex
+}
+
+function paintPitch(g: CanvasRenderingContext2D, p: PitchSpec, grass: HTMLImageElement | null, noise: HTMLCanvasElement) {
+  const W = (p.w + APRON * 2) * PX
+  const H = (p.h + APRON * 2) * PX
   const m = (v: number) => (v + APRON) * PX
 
   g.fillStyle = '#1d5a2a'
   g.fillRect(0, 0, W, H)
-  const bands = 16
-  const bh = (p.h * PX) / bands
-  for (let i = 0; i < bands; i++) {
-    g.fillStyle = i % 2 ? '#2c7a37' : '#33873e'
-    g.fillRect(m(0), m(0) + i * bh, p.w * PX, bh)
+  if (grass) {
+    const tile = (p.h * PX) / 2
+    g.drawImage(grass, m(0), m(0), p.w * PX, tile)
+    g.drawImage(grass, m(0), m(0) + tile, p.w * PX, tile)
+  } else {
+    const bands = 16
+    const bh = (p.h * PX) / bands
+    for (let i = 0; i < bands; i++) {
+      g.fillStyle = i % 2 ? '#2c7a37' : '#33873e'
+      g.fillRect(m(0), m(0) + i * bh, p.w * PX, bh)
+    }
   }
   // Blade-level noise so the stripes don't look like flat paint
-  for (let i = 0; i < 60000; i++) {
-    const light = Math.random() < 0.5
-    g.fillStyle = light ? 'rgba(180, 255, 170, 0.05)' : 'rgba(0, 30, 0, 0.08)'
-    g.fillRect(Math.random() * W, Math.random() * H, 1, 2 + Math.random() * 3)
-  }
+  g.drawImage(noise, 0, 0)
 
   g.strokeStyle = 'rgba(255, 255, 255, 0.92)'
   g.fillStyle = 'rgba(255, 255, 255, 0.92)'
@@ -113,7 +141,6 @@ function pitchTexture(p: PitchSpec, aniso: number) {
   g.beginPath()
   g.arc(m(cx), m(cy), 0.25 * PX, 0, Math.PI * 2)
   g.fill()
-  return texture(c, aniso)
 }
 
 function boardTexture() {
@@ -185,7 +212,7 @@ function netTexture() {
   return t
 }
 
-function goal(p: PitchSpec, netTex: CanvasTexture) {
+function goal(p: PitchSpec, netTex: CanvasTexture, nets: Mesh[]) {
   const group = new Group()
   const white = new MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, metalness: 0.1 })
   const r = 0.07
@@ -211,6 +238,7 @@ function goal(p: PitchSpec, netTex: CanvasTexture) {
   }
   const back = new Mesh(new PlaneGeometry(p.goalW, p.crossbar), net(p.goalW, p.crossbar))
   back.position.set(0, p.crossbar / 2, -d)
+  nets.push(back)
   const roof = new Mesh(new PlaneGeometry(p.goalW, d), net(p.goalW, d))
   roof.rotation.x = Math.PI / 2
   roof.position.set(0, p.crossbar, -d / 2)
@@ -224,8 +252,10 @@ function goal(p: PitchSpec, netTex: CanvasTexture) {
   return group
 }
 
+/** Builds the scenery. `nets` are the back nets, top goal first, so a goal can make them bulge. */
 export function buildStadium(p: PitchSpec, aniso: number) {
   const group = new Group()
+  const nets: Mesh[] = []
 
   const outer = new Mesh(
     new PlaneGeometry(240, 240).rotateX(-Math.PI / 2),
@@ -246,7 +276,7 @@ export function buildStadium(p: PitchSpec, aniso: number) {
     [-p.h / 2, 0],
     [p.h / 2, Math.PI],
   ]) {
-    const g = goal(p, netTexture())
+    const g = goal(p, netTexture(), nets)
     g.position.z = z
     g.rotation.y = rot
     group.add(g)
@@ -307,5 +337,5 @@ export function buildStadium(p: PitchSpec, aniso: number) {
       group.add(pole, lamp)
     }
   }
-  return group
+  return { group, nets }
 }

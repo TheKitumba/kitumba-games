@@ -12,6 +12,15 @@ class AudioEngine {
   private crowd: { src: AudioBufferSourceNode; gain: GainNode } | null = null
 
   muted = false
+  /** Last play time per throttled sound, so a burst of contacts doesn't stack up into noise */
+  private last: Record<string, number> = {}
+
+  private throttle(name: string, gap: number) {
+    const now = performance.now()
+    if (now - (this.last[name] ?? 0) < gap * 1000) return false
+    this.last[name] = now
+    return true
+  }
 
   private ensure() {
     if (this.ctx) {
@@ -180,16 +189,28 @@ class AudioEngine {
 
   /** `power` goes from 0 (tap) to 1 (full shot). */
   kick(power: number) {
-    this.tone(140, 0.12, { type: 'sine', vol: 0.18 + power * 0.12, slideTo: 60, cutoff: 900 })
-    this.noise(0.05, { vol: 0.08 + power * 0.06, band: 1800 })
+    if (!this.throttle('kick', 0.04)) return
+    // A little pitch and level spread so repeated passes don't sound identical
+    const v = 0.9 + Math.random() * 0.2
+    this.tone(140 * v, 0.12, { type: 'sine', vol: (0.18 + power * 0.12) * v, slideTo: 60, cutoff: 900 })
+    this.noise(0.05, { vol: 0.08 + power * 0.06, band: 1800 * v })
+  }
+
+  /** Keeper's hands on the ball and an "ooh" from the stands */
+  save() {
+    const t = this.ensure().currentTime
+    this.tone(180, 0.1, { type: 'sine', vol: 0.2, slideTo: 90, cutoff: 700 })
+    this.noise(0.9, { vol: 0.12, band: 450, sweepTo: 650, attack: 0.12, at: t + 0.05 })
   }
 
   whiff() {
+    if (!this.throttle('whiff', 0.1)) return
     this.noise(0.12, { vol: 0.06, band: 700, sweepTo: 1800 })
   }
 
   bounce() {
-    this.tone(220, 0.06, { type: 'sine', vol: 0.07, slideTo: 120, cutoff: 1200 })
+    if (!this.throttle('bounce', 0.08)) return
+    this.tone(200 + Math.random() * 40, 0.06, { type: 'sine', vol: 0.07, slideTo: 120, cutoff: 1200 })
   }
 
   post() {

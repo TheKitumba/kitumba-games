@@ -23,6 +23,8 @@ export interface Kit {
   socks: number
   /** CSS colour for the shirt number */
   number: string
+  /** Vertical stripes on the shirt, if any */
+  stripes?: number
 }
 
 export interface Look {
@@ -46,6 +48,8 @@ export interface Pose {
   /** Keeper dive in local space: -1 to the model's right, 1 to its left, 0 standing */
   dive: number
   celebrate: boolean
+  /** 0..1 knees bent, side-on, arms out: a defender jockeying or a keeper set for a shot */
+  crouch: number
   time: number
 }
 
@@ -93,6 +97,29 @@ const mat = (color: number, roughness = 0.85) => {
   return m
 }
 
+const shirtCache = new Map<string, MeshStandardMaterial>()
+/** Shirt colour with optional stripes; the torso capsule's u runs around the body, so stripes are columns */
+const shirtMaterial = (kit: Kit) => {
+  if (kit.stripes === undefined) return mat(kit.shirt, 0.75)
+  const key = `${kit.shirt}:${kit.stripes}`
+  let m = shirtCache.get(key)
+  if (!m) {
+    const c = document.createElement('canvas')
+    c.width = 128
+    c.height = 4
+    const g = c.getContext('2d')!
+    g.fillStyle = `#${kit.shirt.toString(16).padStart(6, '0')}`
+    g.fillRect(0, 0, 128, 4)
+    g.fillStyle = `#${kit.stripes.toString(16).padStart(6, '0')}`
+    for (let i = 0; i < 8; i++) g.fillRect(i * 16 + 5, 0, 6, 4)
+    const tex = new CanvasTexture(c)
+    tex.colorSpace = SRGBColorSpace
+    m = new MeshStandardMaterial({ map: tex, roughness: 0.75 })
+    shirtCache.set(key, m)
+  }
+  return m
+}
+
 const numberMaterial = (n: number, color: string) => {
   const c = document.createElement('canvas')
   c.width = c.height = 64
@@ -133,11 +160,14 @@ export class Humanoid {
   private legs: { hip: Group; knee: Group }[] = []
   private arms: { shoulder: Group; elbow: Group }[] = []
   private numberMat: MeshStandardMaterial
+  /** Every posed value, so poses blend instead of snapping */
+  private joints: { o: { x: number; y: number; z: number }; axes: ('x' | 'y' | 'z')[] }[] = []
+  private blended: number[] | null = null
 
   constructor(kit: Kit, look: Look, shirtNumber: number, keeper: boolean) {
     const g = geometry()
     const skin = mat(look.skin, 0.7)
-    const shirt = mat(kit.shirt, 0.75)
+    const shirt = shirtMaterial(kit)
     const sleeve = mat(kit.sleeve, 0.75)
     const shorts = mat(kit.shorts, 0.8)
     const socks = mat(kit.socks, 0.9)
@@ -182,6 +212,16 @@ export class Humanoid {
     mesh(g.head, skin, this.head)
     mesh(g.nose, skin, this.head, 0, -0.01, 0.11)
     if (look.hairStyle < 3) mesh(g[`hair${look.hairStyle}`], mat(look.hair, 0.95), this.head, 0, 0.02, -0.01)
+
+    const xyz = ['x', 'y', 'z'] as ('x' | 'y' | 'z')[]
+    this.joints.push(
+      { o: this.hips.position, axes: ['y'] },
+      { o: this.hips.rotation, axes: xyz },
+      { o: this.chest.rotation, axes: xyz },
+      { o: this.head.rotation, axes: ['x'] },
+    )
+    for (const l of this.legs) this.joints.push({ o: l.hip.rotation, axes: xyz }, { o: l.knee.rotation, axes: ['x'] })
+    for (const a of this.arms) this.joints.push({ o: a.shoulder.rotation, axes: xyz }, { o: a.elbow.rotation, axes: ['x'] })
   }
 
   dispose() {
@@ -189,7 +229,29 @@ export class Humanoid {
     this.numberMat.dispose()
   }
 
-  pose(p: Pose) {
+  /** Poses the body for this frame, easing from the previous pose over ~0.05 s */
+  pose(p: Pose, dt: number) {
+    this.target(p)
+    const k = 1 - Math.exp(-dt * 30)
+    const prev = this.blended
+    const next: number[] = prev ?? []
+    let i = 0
+    for (const j of this.joints) {
+      for (const a of j.axes) {
+        const v = prev ? prev[i] + (j.o[a] - prev[i]) * k : j.o[a]
+        j.o[a] = v
+        next[i++] = v
+      }
+    }
+    this.blended = next
+  }
+
+  /** Snaps to the pose with no blending, e.g. after everyone is teleported for a kickoff */
+  resetBlend() {
+    this.blended = null
+  }
+
+  private target(p: Pose) {
     const [legA, legB] = this.legs
     const [armA, armB] = this.arms
     const s = p.speed
@@ -219,6 +281,18 @@ export class Humanoid {
       legA.hip.rotation.x = -0.06
       armA.shoulder.rotation.x = 0.05 + breathe * 0.03
       armB.shoulder.rotation.x = 0.05 - breathe * 0.03
+    }
+
+    if (p.crouch > 0 && s < 0.6) {
+      const c = p.crouch
+      this.hips.position.y = HIP_Y - 0.12 * c
+      legA.hip.rotation.set(-0.35 * c + legA.hip.rotation.x * (1 - c), 0, 0.18 * c)
+      legB.hip.rotation.set(-0.35 * c + legB.hip.rotation.x * (1 - c), 0, -0.18 * c)
+      legA.knee.rotation.x = Math.max(legA.knee.rotation.x, 0.7 * c)
+      legB.knee.rotation.x = Math.max(legB.knee.rotation.x, 0.7 * c)
+      this.chest.rotation.x = 0.3 * c
+      armA.shoulder.rotation.set(-0.3 * c, 0, 0.55 * c)
+      armB.shoulder.rotation.set(-0.3 * c, 0, -0.55 * c)
     }
 
     if (p.kick > 0) {
