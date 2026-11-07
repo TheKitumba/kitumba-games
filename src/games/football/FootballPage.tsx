@@ -13,6 +13,7 @@ import soundIcon from './assets/icons/sound.svg?raw'
 import stickBaseUrl from './assets/joystick-base.svg'
 import stickKnobUrl from './assets/joystick-knob.svg'
 import { FootballGame, type Action, type HudState } from './engine'
+import { useMedia } from '../../hooks/media'
 
 const MOVE_KEYS: Record<string, [number, number]> = {
   ArrowUp: [0, -1],
@@ -57,19 +58,6 @@ const RESULT_TEXT = {
   draw: { label: 'Apito final', title: 'EMPATE', color: 'text-amber-200' },
   loss: { label: 'Apito final', title: 'DERROTA', color: 'text-rose-300' },
 } as const
-
-/** Tracks a media query, e.g. touch screens or a phone held sideways */
-function useMedia(query: string) {
-  const [match, setMatch] = useState(() => typeof matchMedia === 'function' && matchMedia(query).matches)
-  useEffect(() => {
-    const mq = matchMedia(query)
-    const on = () => setMatch(mq.matches)
-    on()
-    mq.addEventListener('change', on)
-    return () => mq.removeEventListener('change', on)
-  }, [query])
-  return match
-}
 
 /** An icon from the asset pack; the SVGs stroke with currentColor, so CSS colours them */
 function Icon({ svg, className = 'h-5 w-5' }: { svg: string; className?: string }) {
